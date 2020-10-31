@@ -24,9 +24,9 @@ class TFRecodeLib():
         self.train_ratio = float(section['train_ratio'])
         self.train_file,self.test_file = self.get_file_name(self.file_root + self.data_path)
         self.file_name = []
-        self.image_w = int(section['image_size'])
-        self.image_h = int(section['image_size'])
-        self.sess = tf.Session()
+        self.image_w = int(section['image_width'])
+        self.image_h = int(section['image_height'])
+        self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
         print("Init is success")
 
 
@@ -112,7 +112,7 @@ class TFRecodeLib():
                 image_index += 1
                 if image_index % 20 == 0:
                     tf.reset_default_graph()
-                    self.sess = tf.Session()
+                    self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
             if image_index == len(data):
                 break
 
@@ -212,7 +212,7 @@ class DataSetLib():
         获取 Batch size 数据
         :return:  图像Tensor ， 标签Tensor
         '''
-        print("数据集 ： ",self.data)
+        print("数据集 : ".encode('utf-8'), self.data)
         dataSet = data.TFRecordDataset(self.data)
         dataSet = dataSet.map(self.parse)
         dataSet = dataSet.map(lambda image,label:(self.total_image_norm(image,[self.image_w,self.image_h,3]),label))

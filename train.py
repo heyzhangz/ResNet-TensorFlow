@@ -27,7 +27,8 @@ args = parser.parse_args()
 LEARNING_RATE_BASE = args.lr  # 基础学习率
 N_CLASSES = args.classes      # 分类数目
 BATCH_SIZE = args.batch_size  # 批大小
-IMAGE_SIZE = cfg_image["image_size"] # 图像大小
+IMAGE_WIDTH = cfg_image["image_width"] # 图像大小
+IMAGE_HEIGHT = cfg_image["image_height"] 
 NUM_CHANNELS = 3              # 图像深度
 STEP = args.step              # 迭代步数
 SAVE_NUM = args.save_num      # 保存步长
@@ -35,7 +36,7 @@ MODEL_PATH = args.output      # 模型保存地址
 LOG_NUM = args.log_num        # 输出步长
 MODEL = args.model            # 加载模型继续训练
 
-config = tf.ConfigProto()
+config = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
 config.gpu_options.allow_growth = True
 session = tf.Session(config=config)
 
@@ -71,7 +72,7 @@ def evaluation(logits, labels):
     
 def train():
     x = tf.placeholder(tf.float32, [
-        None,IMAGE_SIZE,IMAGE_SIZE,
+        None,IMAGE_WIDTH,IMAGE_HEIGHT,
         NUM_CHANNELS],name='x-input')
     # 标签
     y_ = tf.placeholder(tf.int64, [None,1], name='y-input')
@@ -88,11 +89,11 @@ def train():
     # TensorFlow持久化类。
     tf.add_to_collection('pred_network', y)
     saver = tf.train.Saver(tf.all_variables(), max_to_keep=50)
-    with tf.Session() as sess:
+    with tf.Session(config=config) as sess:
         # 初始化神经网络
         tf.global_variables_initializer().run()
         with tf.device("/cpu:0"):
-            get_flow = OF(sess, "Train", [IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS], BATCH_SIZE)
+            get_flow = OF(sess, "Train", [IMAGE_WIDTH, IMAGE_HEIGHT, NUM_CHANNELS], BATCH_SIZE)
             # 获取训练TenSor
             next_batch = get_flow.get_batch_data()
         if MODEL is not None:

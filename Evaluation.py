@@ -16,7 +16,8 @@ parser.add_argument("--batch_size",type=int,default=cfg_test["batch_size"])
 args = parser.parse_args()
 
 BATCH_SIZE =  args.batch_size
-IMAGE_SIZE = cfg_image['image_size']
+IMAGE_WIDTH= cfg_image['image_width']
+IMAGE_HEIGHT = cfg_image['image_height']
 N_CLASSES = args.classes
 
 #模型地址
@@ -41,10 +42,10 @@ def test():
     # tf.get_collection() 返回一个list. 但是这里只要第一个参数即可
     pred = tf.get_collection('pred_network')[0]
 
-    with tf.Session(graph=graph) as sess:
+    with tf.Session(graph=graph, config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         model.restore(sess, MODEL_PATH)
         # x, y = ds.get_batch_data(TEST_DIR, sess, False, BATCH_SIZE)
-        get_flow = OF(sess,"Test",[IMAGE_SIZE,IMAGE_SIZE,3],BATCH_SIZE)
+        get_flow = OF(sess,"Test",[IMAGE_WIDTH,IMAGE_HEIGHT,3],BATCH_SIZE)
         next_batch = get_flow.get_batch_data()
         # 取出测试集合
         test_pred_acc = []
